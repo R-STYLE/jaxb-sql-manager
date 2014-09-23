@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "sql")
-public class StructuredSql extends Sql implements ISql {
+public class StructuredSql extends Sql {
 
 	private Statement statement;
 

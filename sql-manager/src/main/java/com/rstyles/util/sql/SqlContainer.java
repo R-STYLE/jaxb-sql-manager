@@ -13,22 +13,17 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @XmlRootElement(name = "sql-container")
 public class SqlContainer {
 
-	private List<ISql> sqls = new ArrayList<>();
+	private List<Sql> sqls = new ArrayList<>();
 
-//	@XmlAnyElement
-//	@XmlElementRefs({
-//			@XmlElementRef(name = "sql", type = StructuredSql.class)
-//			,@XmlElementRef(name = "plain-sql", type = PlainSql.class)
-//	})
 	@XmlElements({
-		@XmlElement(name = "sql", type = StructuredSql.class)
-		,@XmlElement(name = "plain-sql", type = PlainSql.class)
+			@XmlElement(name = "sql", type = StructuredSql.class),
+			@XmlElement(name = "plain-sql", type = PlainSql.class)
 	})
-	public List<ISql> getSqls() {
+	public List<Sql> getSqls() {
 		return sqls;
 	}
 
-	public void setSqls(List<ISql> sqls) {
+	public void setSqls(List<Sql> sqls) {
 		this.sqls = sqls;
 	}
 

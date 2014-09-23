@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlID;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public abstract class Sql implements ISql {
+public abstract class Sql {
 
 	private String id;
 
