@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Select extends Clause implements Statement {
 
-	private Type type;
-
 	private Clause columns;
 	private Clause from;
 	private Clause where;
@@ -17,15 +15,6 @@ public class Select extends Clause implements Statement {
 	private Limit limit;
 
 	private Boolean forupdate;
-
-	@XmlAttribute
-	public Type getType() {
-		return type;
-	}
-
-	public void setType(Type type) {
-		this.type = type;
-	}
 
 	@XmlElement
 	public Clause getColumns() {

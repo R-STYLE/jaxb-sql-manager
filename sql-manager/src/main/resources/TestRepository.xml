@@ -1,66 +1,65 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <sql-container>
-    <sql id="test001">
-        <select type="structured">
-            <columns>a,b,c
-                <if expr="d != null">,d</if>
-            </columns>
-            <from>hoge
-                <if expr="b = 1"> join var</if>
-            </from>
-            <where>a = c
-                <if expr="d != null"> and d is not null</if>
-            </where>
-            <orderby>a asc</orderby>
-            <groupby>b</groupby>
-            <limit>
-                <rows>10</rows>
-            </limit>
-        </select>
-    </sql>
-    <sql id="test002">
-        <select type="raw" forupdate="true">select a, b, c from hoge where a = c and b = :b</select>
-    </sql>
-    <sql id="test003">
-        <insert>
-            <into>hoge</into>
-            <columns>a, b
-                <if expr="c != null">, c</if>
-            </columns>
-            <values>:a, :b
-                <if expr="c != null">, :c</if>
-            </values>
-        </insert>
-    </sql>
-    <sql id="test004">
-        <insert>
-            <into>hoge</into>
-            <columns>a, b, c</columns>
-            <select type="raw">select a, b, c from mage where a = c and b = :b</select>
-        </insert>
-    </sql>
-    <sql id="test005">
-        <insert type="raw">insert into hoge (a, b, c) values (:a, :b, :c)</insert>
-    </sql>
-    <sql id="test006">
-        <update>
-            <table>hoge</table>
-            <set>(a = :a, b = :b
-                <if expr="c != null">, c = :c</if>
-            </set>
-            <where>d > 0</where>
-        </update>
-    </sql>
-    <sql id="test007">
-        <update type="raw">update hoge set (a = :a, b = :b, c = :c) where d > 0</update>
-    </sql>
-    <sql id="test006">
-        <delete>
-            <from>hoge</from>
-            <where>d = 0</where>
-        </delete>
-    </sql>
-    <sql id="test009">
-        <delete type="raw">delete from hoge where d = 0</delete>
-    </sql>
+	<sql id="test001" type="structured">
+		<select>
+			<columns>
+				a,b,c
+				<if expr="d != null">,d</if>
+			</columns>
+			<from>
+				hoge
+				<if expr="b = 1"> join var</if>
+			</from>
+			<where>
+				a = c
+				<if expr="d != null"> and d is not null</if>
+			</where>
+			<orderby>a asc</orderby>
+			<groupby>b</groupby>
+			<limit>
+				<rows>10</rows>
+			</limit>
+		</select>
+	</sql>
+	<sql id="test002">
+		<insert>
+			<into>hoge</into>
+			<columns>
+				a, b
+				<if expr="c != null">, c</if>
+			</columns>
+			<values>
+				:a, :b
+				<if expr="c != null">, :c</if>
+			</values>
+		</insert>
+	</sql>
+	<sql id="test003">
+		<insert>
+			<into>hoge</into>
+			<columns>a, b, c</columns>
+			<select type="raw">select a, b, c from mage where a = c and b = :b
+			</select>
+		</insert>
+	</sql>
+	<sql id="test004">
+		<update>
+			<table>hoge</table>
+			<set>
+				(a = :a, b = :b
+				<if expr="c != null">, c = :c</if>
+			</set>
+			<where>d > 0</where>
+		</update>
+	</sql>
+	<sql id="test005">
+		<delete>
+			<from>hoge</from>
+			<where>d = 0</where>
+		</delete>
+	</sql>
+	<plain-sql id="test002"><statement>select a, b, c from hoge where a = c and b = :b</statement></plain-sql>
+	<plain-sql id="test005"><statement>insert into hoge (a, b, c) values (:a, :b, :c)</statement></plain-sql>
+	<plain-sql id="test007"><statement>update hoge set (a = :a, b = :b, c = :c) where d &lt; 0</statement></plain-sql>
+	<plain-sql id="test009"><statement>delete from hoge where d = 0</statement></plain-sql>
 </sql-container>

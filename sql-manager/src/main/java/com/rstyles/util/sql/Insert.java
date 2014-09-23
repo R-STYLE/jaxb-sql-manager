@@ -1,6 +1,5 @@
 package com.rstyles.util.sql;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
@@ -9,22 +8,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Insert extends Clause implements Statement {
 
-	private Type type;
-
 	private String table;
 
 	private Clause columns;
 
 	private Clause values;
-
-	@XmlAttribute
-	public Type getType() {
-		return type;
-	}
-
-	public void setType(Type type) {
-		this.type = type;
-	}
 
 	@XmlElement(name = "into")
 	public String getTable() {
