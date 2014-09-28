@@ -1,20 +1,59 @@
 package com.rstyles.util.sql;
 
-import java.util.Map;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class SqlRegistry {
+import javax.xml.bind.JAXB;
 
-	private static ConcurrentMap<Class<?>, Sql> CACHE = new ConcurrentHashMap<>();
-	
-	public static String getSql(Class<?> clazz, String id, Map<String, Object> params) {
-		
-		if (clazz == null || Utility.isEmpty(id)) {
+class SqlRegistry {
+
+	private static ConcurrentMap<String, SqlContainer> CACHE = new ConcurrentHashMap<>();
+
+	private SqlRegistry() {
+	}
+
+	static SqlContainer load(final Class<?> clazz) throws FileNotFoundException {
+
+		if (clazz == null) {
 			// TODO: message.
 			throw new IllegalArgumentException();
 		}
-		
-		return null;
+
+		final String resourcePath = toResourcePath(clazz);
+
+		if (CACHE.containsKey(resourcePath)) {
+			return CACHE.get(resourcePath);
+		}
+
+		final SqlContainer loaded = load(clazz, resourcePath);
+		final SqlContainer anotherCached = CACHE.putIfAbsent(resourcePath, loaded);
+		if (anotherCached != null) {
+			return anotherCached;
+		}
+		return loaded;
 	}
+
+	private static SqlContainer load(final Class<?> clazz, final String resourcePath) throws FileNotFoundException {
+
+		final InputStream is = clazz.getClassLoader().getResourceAsStream(resourcePath);
+		if (is == null) {
+			// TODO: message.
+			throw new FileNotFoundException();
+		}
+
+		final SqlContainer current = JAXB.unmarshal(is, SqlContainer.class);
+		if (current == null) {
+			// TODO: message.
+			throw new IllegalStateException();
+		}
+
+		return current;
+	}
+
+	private static String toResourcePath(Class<?> clazz) {
+		return clazz.getCanonicalName().replaceAll("\\.", "/") + ".xml";
+	}
+
 }
