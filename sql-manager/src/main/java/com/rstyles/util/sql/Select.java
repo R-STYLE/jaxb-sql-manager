@@ -1,5 +1,7 @@
 package com.rstyles.util.sql;
 
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -77,6 +79,11 @@ public class Select extends Clause implements Statement {
 
 	public void setForupdate(Boolean forupdate) {
 		this.forupdate = forupdate;
+	}
+
+	@Override
+	public String convert(SqlGenerator generator, Map<String, Object> params) {
+		return generator.generate(this, params);
 	}
 
 }

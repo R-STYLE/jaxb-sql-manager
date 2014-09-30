@@ -7,7 +7,12 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.bind.JAXB;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class SqlRegistry {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SqlRegistry.class);
 
 	private static ConcurrentMap<String, SqlContainer> CACHE = new ConcurrentHashMap<>();
 
@@ -15,18 +20,14 @@ class SqlRegistry {
 	}
 
 	static SqlContainer load(final Class<?> clazz) throws FileNotFoundException {
-
 		if (clazz == null) {
 			// TODO: message.
 			throw new IllegalArgumentException();
 		}
-
 		final String resourcePath = toResourcePath(clazz);
-
 		if (CACHE.containsKey(resourcePath)) {
 			return CACHE.get(resourcePath);
 		}
-
 		final SqlContainer loaded = load(clazz, resourcePath);
 		final SqlContainer anotherCached = CACHE.putIfAbsent(resourcePath, loaded);
 		if (anotherCached != null) {

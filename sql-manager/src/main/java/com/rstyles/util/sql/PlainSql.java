@@ -1,5 +1,7 @@
 package com.rstyles.util.sql;
 
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -15,6 +17,11 @@ public class PlainSql extends Sql {
 
 	public void setStatement(String statement) {
 		this.statement = statement;
+	}
+
+	@Override
+	public String convert(SqlGenerator generator, Map<String, Object> params) {
+		return this.statement;
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.rstyles.util.sql;
 
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
@@ -23,6 +25,11 @@ public class StructuredSql extends Sql {
 
 	public void setStatement(Statement statement) {
 		this.statement = statement;
+	}
+
+	@Override
+	public String convert(SqlGenerator generator, Map<String, Object> params) {
+		return this.statement.convert(generator, params);
 	}
 
 }

@@ -5,6 +5,9 @@
 			<columns>
 				a,b,c
 				<if expr="d != null">,d</if>
+				<if expr="d =..= 1">,d1</if>
+				<if expr="d != 1">,d2</if>
+				,e
 			</columns>
 			<from>
 				hoge

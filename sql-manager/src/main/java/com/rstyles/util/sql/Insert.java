@@ -1,5 +1,7 @@
 package com.rstyles.util.sql;
 
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
@@ -42,6 +44,11 @@ public class Insert extends Clause implements Statement {
 
 	public void setValues(Clause values) {
 		this.values = values;
+	}
+
+	@Override
+	public String convert(SqlGenerator generator, Map<String, Object> params) {
+		return generator.generate(this, params);
 	}
 
 }

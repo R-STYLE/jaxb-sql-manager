@@ -1,13 +1,15 @@
 package com.rstyles.util.sql;
 
+import java.util.Map;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Delete extends Clause implements Statement {
-	
+
 	private String table;
-	
+
 	private Clause where;
 
 	@XmlElement(name = "from")
@@ -26,6 +28,11 @@ public class Delete extends Clause implements Statement {
 
 	public void setWhere(Clause where) {
 		this.where = where;
+	}
+
+	@Override
+	public String convert(SqlGenerator generator, Map<String, Object> params) {
+		return generator.generate(this, params);
 	}
 
 }
