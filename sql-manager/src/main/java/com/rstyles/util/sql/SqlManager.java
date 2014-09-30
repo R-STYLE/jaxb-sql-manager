@@ -1,6 +1,7 @@
 package com.rstyles.util.sql;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -49,7 +50,7 @@ public final class SqlManager {
 
 	}
 
-	public String getSql(final Class<?> clazz, final String id, final Map<String, Object> params) throws FileNotFoundException {
+	public String getSql(final Class<?> clazz, final String id, final Map<String, Object> params) throws IOException {
 		final SqlContainer container = SqlRegistry.load(clazz);
 		return this.getSql(container, id, params).convert(generator, params);
 	}
