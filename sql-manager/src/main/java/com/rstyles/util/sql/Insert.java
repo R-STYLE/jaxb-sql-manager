@@ -8,13 +8,13 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Insert extends Clause implements Statement {
+public class Insert extends Statement implements IStatement {
 
 	private String table;
 
-	private Clause columns;
+	private SimpleClause columns;
 
-	private Clause values;
+	private IValues values;
 
 	@XmlElement(name = "into")
 	public String getTable() {
@@ -26,23 +26,23 @@ public class Insert extends Clause implements Statement {
 	}
 
 	@XmlElement
-	public Clause getColumns() {
+	public SimpleClause getColumns() {
 		return columns;
 	}
 
-	public void setColumns(Clause columns) {
+	public void setColumns(SimpleClause columns) {
 		this.columns = columns;
 	}
 
 	@XmlElementRefs({
-			@XmlElementRef(name = "values", type = Clause.class),
-			@XmlElementRef(name = "select", type = Select.class)
+			@XmlElementRef(name = "values", type = Values.class),
+			@XmlElementRef(name = "select", type = SelectClause.class)
 	})
-	public Clause getValues() {
+	public IValues getValues() {
 		return values;
 	}
 
-	public void setValues(Clause values) {
+	public void setValues(IValues values) {
 		this.values = values;
 	}
 

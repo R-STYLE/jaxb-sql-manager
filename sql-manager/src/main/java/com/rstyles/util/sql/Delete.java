@@ -6,11 +6,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Delete extends Clause implements Statement {
+public class Delete extends Statement implements IStatement {
 
 	private String table;
 
-	private Clause where;
+	private Where where;
 
 	@XmlElement(name = "from")
 	public String getTable() {
@@ -22,11 +22,11 @@ public class Delete extends Clause implements Statement {
 	}
 
 	@XmlElement
-	public Clause getWhere() {
+	public Where getWhere() {
 		return where;
 	}
 
-	public void setWhere(Clause where) {
+	public void setWhere(Where where) {
 		this.where = where;
 	}
 

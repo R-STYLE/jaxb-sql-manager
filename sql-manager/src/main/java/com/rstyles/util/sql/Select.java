@@ -1,5 +1,7 @@
 package com.rstyles.util.sql;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -7,60 +9,71 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Select extends Clause implements Statement {
+public class Select extends Statement implements IStatement {
 
-	private Clause columns;
-	private Clause from;
-	private Clause where;
-	private Clause orderby;
-	private Clause groupby;
+	private List<SimpleClause> columns = new ArrayList<>();
+	private From from;
+	private Where where;
+	private List<SimpleClause> groupby = new ArrayList<>();
+	private List<SimpleClause> having = new ArrayList<>();
+	private List<SimpleClause> orderby = new ArrayList<>();
 	private Limit limit;
 
+	private Boolean distinct;
 	private Boolean forupdate;
 
 	@XmlElement
-	public Clause getColumns() {
+	public List<SimpleClause> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(Clause columns) {
+	public void setColumns(List<SimpleClause> columns) {
 		this.columns = columns;
 	}
 
 	@XmlElement
-	public Clause getFrom() {
+	public From getFrom() {
 		return from;
 	}
 
-	public void setFrom(Clause from) {
+	public void setFrom(From from) {
 		this.from = from;
 	}
 
 	@XmlElement
-	public Clause getWhere() {
+	public Where getWhere() {
 		return where;
 	}
 
-	public void setWhere(Clause where) {
+	public void setWhere(Where where) {
 		this.where = where;
 	}
 
 	@XmlElement
-	public Clause getOrderby() {
-		return orderby;
-	}
-
-	public void setOrderby(Clause orderby) {
-		this.orderby = orderby;
-	}
-
-	@XmlElement
-	public Clause getGroupby() {
+	public List<SimpleClause> getGroupby() {
 		return groupby;
 	}
 
-	public void setGroupby(Clause groupby) {
+	public void setGroupby(List<SimpleClause> groupby) {
 		this.groupby = groupby;
+	}
+	
+	@XmlElement
+	public List<SimpleClause> getHaving() {
+		return having;
+	}
+
+	public void setHaving(List<SimpleClause> having) {
+		this.having = having;
+	}
+	
+	@XmlElement
+	public List<SimpleClause> getOrderby() {
+		return orderby;
+	}
+
+	public void setOrderby(List<SimpleClause> orderby) {
+		this.orderby = orderby;
 	}
 
 	@XmlElement
@@ -70,6 +83,15 @@ public class Select extends Clause implements Statement {
 
 	public void setLimit(Limit limit) {
 		this.limit = limit;
+	}
+	
+	@XmlAttribute
+	public Boolean getDistinct() {
+		return distinct;
+	}
+
+	public void setDistinct(Boolean distinct) {
+		this.distinct = distinct;
 	}
 
 	@XmlAttribute

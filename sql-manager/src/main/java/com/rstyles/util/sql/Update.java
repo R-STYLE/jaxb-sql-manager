@@ -6,11 +6,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "update")
-public class Update extends Clause implements Statement {
+public class Update extends Statement implements IStatement {
 
 	private String table;
 
-	private Clause set;
+	private Set set;
 
 	@XmlElement
 	public String getTable() {
@@ -22,11 +22,11 @@ public class Update extends Clause implements Statement {
 	}
 
 	@XmlElement
-	public Clause getSet() {
+	public Set getSet() {
 		return set;
 	}
 
-	public void setSet(Clause set) {
+	public void setSet(Set set) {
 		this.set = set;
 	}
 

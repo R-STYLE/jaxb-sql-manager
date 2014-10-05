@@ -17,7 +17,7 @@ public class Limit {
 
 	private String condition;
 
-	private List<Condition> conditions = new ArrayList<>();
+	private List<Conditional> conditions = new ArrayList<>();
 
 	@XmlElement(name = "offset")
 	public Long getOffset() {
@@ -47,11 +47,11 @@ public class Limit {
 	}
 
 	@XmlElement(name = "if")
-	public List<Condition> getConditions() {
+	public List<Conditional> getConditions() {
 		return conditions;
 	}
 
-	public void setConditions(List<Condition> conditions) {
+	public void setConditions(List<Conditional> conditions) {
 		this.conditions = conditions;
 	}
 

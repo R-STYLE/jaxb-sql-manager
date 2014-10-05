@@ -1,12 +1,11 @@
 package com.rstyles.util.sql;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,9 +15,8 @@ class DefaultSqlGenerator implements SqlGenerator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSqlGenerator.class);
 
-	private static final ScriptEngineManager MANAGER = new ScriptEngineManager();
-
-	private static final String SCRIPT_KIND = "javascript";
+	public DefaultSqlGenerator() {
+	}
 
 	@Override
 	public String generate(final Insert insert, final Map<String, Object> params) {
@@ -29,16 +27,21 @@ class DefaultSqlGenerator implements SqlGenerator {
 	@Override
 	public String generate(final Select select, final Map<String, Object> params) {
 
-		final ScriptEngine engine = this.prepareScriptEngine(params);
+		final List<SimpleClause> columns = select.getColumns();
+		if (columns == null || columns.isEmpty()) {
+			return GeneratorUtil.trimedJoin(select.getContexts());
+		}
 
-		final Clause columns = select.getColumns();
+		final ScriptEngine engine = GeneratorUtil.prepareDefaultScriptEngine(params);
 
 		final StringBuilder builder = new StringBuilder("SELECT ");
-		
-		if (this.isEnabled(columns, engine)) {
-			this.appendColumns(builder, columns, engine);
+		for (SimpleClause column : columns) {
+			builder.append(column.convert(this, engine));
 		}
-		
+
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		builder.append(select.getFrom().convert(this, engine));
+
 		return builder.toString();
 	}
 
@@ -54,90 +57,251 @@ class DefaultSqlGenerator implements SqlGenerator {
 		return null;
 	}
 
-	private ScriptEngine prepareScriptEngine(final Map<String, Object> params) {
-		final ScriptEngine engine = MANAGER.getEngineByName(SCRIPT_KIND);
-		this.assignParams(engine, params);
-		return engine;
-	}
+	@Override
+	public String generate(SimpleClause clause, ScriptEngine engine) {
 
-	private ScriptEngine assignParams(final ScriptEngine engine, final Map<String, Object> params) {
-		if (params == null || params.isEmpty()) {
-			return engine;
+		if (GeneratorUtil.isDisabled(clause, engine)) {
+			return StringUtils.EMPTY;
 		}
-		for (final Entry<String, Object> param : params.entrySet()) {
-			engine.put(param.getKey(), param.getValue());
+
+		final LinkedList<Conditional> conditions = new LinkedList<>(clause.getConditionals());
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("conditions: " + conditions.size());
 		}
-		return engine;
-	}
-	
-	private void appendColumns(final StringBuilder builder, final Clause columns, final ScriptEngine engine) {
-		final LinkedList<Condition> conditions = new LinkedList<>(columns.getConditions());
-		final LinkedList<String> contexts = new LinkedList<>(columns.getContexts());
+
+		final List<String> contexts = clause.getContexts();
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("contexts  : " + contexts.size());
+			for (String context : contexts) {
+				LOGGER.debug("context   : " + StringUtils.trim(context));
+			}
+		}
 		if (conditions == null || conditions.isEmpty()) {
-			builder.append(contexts.getFirst().trim());
-			return;
+			return GeneratorUtil.trimedJoin(contexts);
 		}
+
+		final StringBuilder builder = new StringBuilder();
+
 		for (String context : contexts) {
-			final String trimed = context.trim();
+			final String trimed = StringUtils.trim(context);
 			if (StringUtils.isEmpty(trimed)) {
-				builder.append(this.getConditional(conditions.pop(), engine));
+				builder.append(GeneratorUtil.generateConditional(conditions.pop(), engine));
 				continue;
 			}
 			builder.append(trimed);
 		}
-	}
-	
-	private String getConditional(final Condition condition, final ScriptEngine engine) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("condition: " + condition);
-		}
-		if (condition == null) {
-			return StringUtils.EMPTY;
-		}
-		final String context = condition.getContext();
-		if (context == null || context.trim().isEmpty()) {
-			return StringUtils.EMPTY;
-		}
-		if (this.isEnabled(condition.getExpression(), engine)) {
-			return condition.getContext();
-		}
-		return StringUtils.EMPTY;
+		return builder.toString();
 	}
 
-	private boolean isEnabled(final Clause clause, final ScriptEngine engine) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("clause: " + clause);
-		}
-		if (clause == null) {
-			return false;
-		}
-		return this.isEnabled(clause.getCondition(), engine);
+	@Override
+	public String generate(Values values, ScriptEngine engine) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	private boolean isEnabled(final String condition, final ScriptEngine engine) {
+	@Override
+	public String generate(SelectClause select, ScriptEngine engine) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String generate(Conditions conditions, ScriptEngine engine, List<String> clauses) {
+
+		final LinkedList<Conditional> conditionals = new LinkedList<>(conditions.getConditionals());
 		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("if attr: " + condition);
+			LOGGER.debug("conditions: " + conditionals.size());
 		}
-		if (condition == null || condition.trim().isEmpty()) {
-			return true;
-		}
-		Object ret = null;
-		try {
-			ret = engine.eval(condition);
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("eval result: " + ret);
+		final List<String> contexts = conditions.getContexts();
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("contexts  : " + contexts.size());
+			for (String context : contexts) {
+				LOGGER.debug("context   : " + StringUtils.trim(context));
 			}
-		} catch (ScriptException e) {
-			if (LOGGER.isErrorEnabled()) {
-				LOGGER.error("Invalid Script [ " + condition + " ] script kind is [ " + SCRIPT_KIND + " ]", e);
+		}
+		if (conditionals == null || conditionals.isEmpty()) {
+			return GeneratorUtil.trimedJoin(contexts);
+		}
+		final StringBuilder builder = new StringBuilder();
+		for (String context : contexts) {
+			final String trimed = StringUtils.trim(context);
+			if (StringUtils.isEmpty(trimed)) {
+				builder.append(GeneratorUtil.generateConditional(conditionals.pop(), engine));
+				continue;
 			}
-			throw new IllegalFormatException(e);
+			builder.append(trimed);
 		}
-		if  (ret instanceof Boolean) {
-			return ((Boolean) ret).booleanValue();
+		return builder.toString();
+	}
+
+	@Override
+	public String generate(Connector connector, ScriptEngine engine, List<String> clauses) {
+
+		if (GeneratorUtil.isDisabled(connector, engine)) {
+			return StringUtils.EMPTY;
 		}
-		// FIXME: true?
-		return false;
+
+		final StringBuilder builder = new StringBuilder();
+		if (clauses != null && !clauses.isEmpty()) {
+			builder.append(connector.getType());
+		}
+
+		final List<IConditions> conditions = connector.getConditions();
+		if (conditions == null || conditions.isEmpty()) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(GeneratorUtil.trimedJoin(connector.getContexts()));
+			return builder.toString();
+		}
+
+		final List<String> connectClauses = new ArrayList<>();
+		for (IConditions condition : conditions) {
+			final String clause = condition.convert(this, engine, connectClauses);
+			if (StringUtils.isEmpty(clause)) {
+				continue;
+			}
+			connectClauses.add(clause);
+		}
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		builder.append("(");
+		builder.append(StringUtils.join(connectClauses, GeneratorUtil.SEPARATOR_SPACE));
+		builder.append(")");
+		return builder.toString();
+	}
+
+	@Override
+	public String generate(Where where, ScriptEngine engine) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String generate(Table table, ScriptEngine engine) {
+		if (GeneratorUtil.isDisabled(table, engine)) {
+			return StringUtils.EMPTY;
+		}
+		return GeneratorUtil.trimedJoin(table.getContexts());
+	}
+
+	@Override
+	public String generate(From from, ScriptEngine engine) {
+
+		if (from == null) {
+			return StringUtils.EMPTY;
+		}
+
+		final StringBuilder builder = new StringBuilder("FROM");
+
+		final List<ITable> tables = from.getTables();
+		if (tables == null || tables.isEmpty()) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(GeneratorUtil.trimedJoin(from.getContexts()));
+			return builder.toString();
+		}
+		for (ITable table : tables) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(table.convert(this, engine));
+		}
+		return builder.toString();
+	}
+
+	@Override
+	public String generate(Join join, ScriptEngine engine) {
+
+		if (GeneratorUtil.isDisabled(join, engine)) {
+			return StringUtils.EMPTY;
+		}
+
+		final StringBuilder builder = new StringBuilder();
+		final String type = join.getType();
+		if (StringUtils.isNotEmpty(type)) {
+			builder.append(StringUtils.upperCase(type));
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		}
+		builder.append("JOIN");
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		builder.append(GeneratorUtil.trimedJoin(join.getContexts()));
+
+		final IClause conditionClause = join.getCondition();
+		final String condition = conditionClause == null ? "" : conditionClause.convert(this, engine);
+		if (StringUtils.isNotEmpty(condition)) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(condition);
+			return builder.toString();
+		}
+
+		final List<IConditions> conditions = join.getConditions();
+		if (conditions == null || conditions.isEmpty()) {
+			return builder.toString();
+		}
+
+		final List<String> clauses = new ArrayList<>();
+
+		for (IConditions cond : conditions) {
+			final String clause = cond.convert(this, engine, clauses);
+			if (StringUtils.isEmpty(clause)) {
+				continue;
+			}
+			clauses.add(clause);
+		}
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		builder.append(StringUtils.join(clauses, GeneratorUtil.SEPARATOR_SPACE));
+		return builder.toString();
+	}
+
+	@Override
+	public String generate(On on, ScriptEngine engine) {
+
+		if (GeneratorUtil.isDisabled(on, engine)) {
+			return StringUtils.EMPTY;
+		}
+
+		final StringBuilder builder = new StringBuilder("ON");
+
+		final List<IConditions> conditions = on.getConditions();
+		if (conditions == null || conditions.isEmpty()) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(GeneratorUtil.trimedJoin(on.getContexts()));
+			return builder.toString();
+		}
+
+		final List<String> onClauses = new ArrayList<>();
+		for (IConditions condition : conditions) {
+			final String clause = condition.convert(this, engine, onClauses);
+			if (StringUtils.isEmpty(clause)) {
+				continue;
+			}
+			onClauses.add(clause);
+		}
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		builder.append(StringUtils.join(onClauses, GeneratorUtil.SEPARATOR_SPACE));
+		return builder.toString();
+	}
+
+	@Override
+	public String generate(Using using, ScriptEngine engine) {
+
+		if (using == null) {
+			return StringUtils.EMPTY;
+		}
+
+		final StringBuilder builder = new StringBuilder("USING");
+
+		final List<SimpleClause> columns = using.getColumns();
+		if (columns == null || columns.isEmpty()) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(GeneratorUtil.trimedJoin(using.getContexts()));
+			return builder.toString();
+		}
+		for (SimpleClause column : columns) {
+			builder.append(column.convert(this, engine));
+		}
+		return builder.toString();
+	}
+
+	@Override
+	public String generate(Set set, ScriptEngine engine) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

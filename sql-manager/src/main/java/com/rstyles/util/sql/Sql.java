@@ -1,14 +1,12 @@
 package com.rstyles.util.sql;
 
-import java.util.Map;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public abstract class Sql {
+public abstract class Sql implements ISql {
 
 	private String id;
 
@@ -21,8 +19,6 @@ public abstract class Sql {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
-	public abstract String convert(final SqlGenerator generator, final Map<String, Object> params);
 
 	@Override
 	public String toString() {
