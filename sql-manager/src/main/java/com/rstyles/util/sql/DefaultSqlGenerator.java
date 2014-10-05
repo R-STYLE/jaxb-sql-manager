@@ -34,13 +34,41 @@ class DefaultSqlGenerator implements SqlGenerator {
 
 		final ScriptEngine engine = GeneratorUtil.prepareDefaultScriptEngine(params);
 
-		final StringBuilder builder = new StringBuilder("SELECT ");
+		final StringBuilder builder = new StringBuilder("SELECT");
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
 		for (SimpleClause column : columns) {
 			builder.append(column.convert(this, engine));
 		}
 
 		builder.append(GeneratorUtil.SEPARATOR_SPACE);
 		builder.append(select.getFrom().convert(this, engine));
+
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		builder.append(select.getWhere().convert(this, engine));
+
+		final String groupby = this.generateSeparated(select.getGroupby(), engine, GeneratorUtil.SEPARATOR_COMMA);
+		if (StringUtils.isNotEmpty(groupby)) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append("GROUP BY");
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(groupby);
+		}
+
+		final String having = this.generateSeparated(select.getHaving(), engine, GeneratorUtil.SEPARATOR_COMMA);
+		if (StringUtils.isNotEmpty(having)) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append("HAVING");
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(having);
+		}
+
+		final String orderby = this.generateSeparated(select.getOrderby(), engine, GeneratorUtil.SEPARATOR_COMMA);
+		if (StringUtils.isNotEmpty(orderby)) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append("ORDER BY");
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(orderby);
+		}
 
 		return builder.toString();
 	}
@@ -107,6 +135,10 @@ class DefaultSqlGenerator implements SqlGenerator {
 
 	@Override
 	public String generate(Conditions conditions, ScriptEngine engine, List<String> clauses) {
+		
+		if (GeneratorUtil.isDisabled(conditions, engine)) {
+			return StringUtils.EMPTY;
+		}
 
 		final LinkedList<Conditional> conditionals = new LinkedList<>(conditions.getConditionals());
 		if (LOGGER.isDebugEnabled()) {
@@ -170,8 +202,31 @@ class DefaultSqlGenerator implements SqlGenerator {
 
 	@Override
 	public String generate(Where where, ScriptEngine engine) {
-		// TODO Auto-generated method stub
-		return null;
+
+		if (GeneratorUtil.isDisabled(where, engine)) {
+			return StringUtils.EMPTY;
+		}
+
+		final StringBuilder builder = new StringBuilder("WHERE");
+
+		final List<IConditions> conditions = where.getConditions();
+		if (conditions == null || conditions.isEmpty()) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append(GeneratorUtil.trimedJoin(where.getContexts()));
+			return builder.toString();
+		}
+
+		final List<String> generatedClauses = new ArrayList<>();
+		for (IConditions condition : conditions) {
+			final String generated = condition.convert(this, engine, generatedClauses);
+			if (StringUtils.isEmpty(generated)) {
+				continue;
+			}
+			generatedClauses.add(generated);
+		}
+		builder.append(GeneratorUtil.SEPARATOR_SPACE);
+		builder.append(StringUtils.join(generatedClauses, GeneratorUtil.SEPARATOR_SPACE));
+		return builder.toString();
 	}
 
 	@Override
@@ -302,6 +357,21 @@ class DefaultSqlGenerator implements SqlGenerator {
 	public String generate(Set set, ScriptEngine engine) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private String generateSeparated(List<SimpleClause> clauses, ScriptEngine engine, String separator) {
+		if (clauses == null || clauses.isEmpty()) {
+			return StringUtils.EMPTY;
+		}
+		final List<String> generatedClauses = new ArrayList<>();
+		for (SimpleClause clause : clauses) {
+			final String generated = clause.convert(this, engine);
+			if (StringUtils.isEmpty(generated)) {
+				continue;
+			}
+			generatedClauses.add(generated);
+		}
+		return StringUtils.join(generatedClauses, separator);
 	}
 
 }

@@ -21,6 +21,8 @@ class GeneratorUtil {
 	static final String SCRIPT_KIND = "javascript";
 
 	static final String SEPARATOR_SPACE = " ";
+	
+	static final String SEPARATOR_COMMA = ",";
 
 	private GeneratorUtil() {
 	}
