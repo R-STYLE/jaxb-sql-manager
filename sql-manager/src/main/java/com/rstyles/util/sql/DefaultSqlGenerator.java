@@ -35,6 +35,13 @@ class DefaultSqlGenerator implements SqlGenerator {
 		final ScriptEngine engine = GeneratorUtil.prepareDefaultScriptEngine(params);
 
 		final StringBuilder builder = new StringBuilder("SELECT");
+
+		final Boolean distinct = select.getDistinct();
+		if (distinct != null && distinct.booleanValue()) {
+			builder.append(GeneratorUtil.SEPARATOR_SPACE);
+			builder.append("DISTINCT");
+		}
+		
 		builder.append(GeneratorUtil.SEPARATOR_SPACE);
 		for (SimpleClause column : columns) {
 			builder.append(column.convert(this, engine));
