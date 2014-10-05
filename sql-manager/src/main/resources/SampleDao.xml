@@ -54,9 +54,51 @@
 		</select>
 	</sql>
 	<sql id="test002">
-		<select>select a, b, c from hoge where a = c and b = :b</select>
+		<insert>
+			<into>hoge</into>
+			<columns>
+				a, b
+				<if expr="c != null">, c</if>
+			</columns>
+			<values>
+				:a, :b
+				<if expr="c != null">, :c</if>
+			</values>
+		</insert>
 	</sql>
-	<plain-sql id="test003">
+	<sql id="test003">
+		<insert>
+			<into>hoge</into>
+			<columns>a, b, c</columns>
+		</insert>
+	</sql>
+	<sql id="test004">
+		<update>
+			<table>hoge</table>
+			<set>
+				(a = :a, b = :b
+				<if expr="c != null">, c = :c</if>
+			</set>
+			<where>d > 0</where>
+		</update>
+	</sql>
+	<sql id="test005">
+		<delete>
+			<from>hoge</from>
+			<where>d = 0</where>
+		</delete>
+	</sql>
+	<plain-sql id="test002">
 		<statement>select a, b, c from hoge where a = c and b = :b</statement>
+	</plain-sql>
+	<plain-sql id="test005">
+		<statement>insert into hoge (a, b, c) values (:a, :b, :c)</statement>
+	</plain-sql>
+	<plain-sql id="test007">
+		<statement>update hoge set (a = :a, b = :b, c = :c) where d &lt; 0
+		</statement>
+	</plain-sql>
+	<plain-sql id="test009">
+		<statement>delete from hoge where d = 0</statement>
 	</plain-sql>
 </sql-container>

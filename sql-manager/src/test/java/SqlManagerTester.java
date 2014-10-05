@@ -13,12 +13,16 @@ public class SqlManagerTester {
 	public void test() throws Exception {
 	
 		final Map<String, Object> params = new HashMap<>();
-		
+		params.put("a", 1);
+		params.put("b", 1);
+		params.put("c", 1);
 		params.put("d", 1);
 
 		final SqlManager manager = SqlManager.getManager();
 		
 		System.out.println(manager.getSql(SampleDao.class, "test001", params));
+		System.out.println(manager.getSql(SampleDao.class, "test002", params));
+		System.out.println(manager.getSql(SampleDao.class, "test003", params));
 	}
 
 }
